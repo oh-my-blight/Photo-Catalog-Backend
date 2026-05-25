@@ -1,4 +1,3 @@
-
 import factories.DatabaseFactory
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -36,10 +35,10 @@ fun main() {
                 call.respondText("Ktor + Exposed + PostgreSQL API работает!")
             }
 
-            swaggerUI(path = "swagger", swaggerFile = "src/main/resources/openapi/documentation.json")
+            swaggerUI(path = "swagger", swaggerFile = "src/main/resources/openapi/documentation.yaml")
 
+            openAPI(path = "openapi", swaggerFile = "src/main/resources/openapi/documentation.yaml")
 
-            openAPI(path = "openapi", swaggerFile = "src/main/resources/openapi/documentation.json")
             get("/health") {
                 val response = StatusResponse(
                     status = "OK",

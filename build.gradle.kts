@@ -1,10 +1,11 @@
 plugins {
     kotlin("jvm") version "2.3.21"
     kotlin("plugin.serialization") version "2.3.21"
+    application
 }
 
-group = "backend"
-version = "1.0-SNAPSHOT"
+group = "Phone-book-backend"
+version = "0.1.0-alpha"
 
 repositories {
     mavenCentral()
@@ -44,10 +45,15 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 
 tasks.test {
     useJUnitPlatform()
+}
+
+
+tasks.withType<JavaExec> {
+    jvmArgs("-Dio.netty.noUnsafe=true")
 }
