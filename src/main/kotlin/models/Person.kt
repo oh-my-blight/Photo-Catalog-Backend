@@ -1,4 +1,4 @@
-package backend.models
+package models
 
 import kotlinx.serialization.Serializable
 

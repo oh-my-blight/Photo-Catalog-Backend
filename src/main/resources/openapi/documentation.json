@@ -1,0 +1,66 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Person & Phone API",
+    "version": "1.0.0",
+    "description": "API для управления пользователями и их номерами телефонов"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "paths": {
+    "/persons": {
+      "get": {
+        "summary": "Получить список пользователей",
+        "description": "Возвращает всех пользователей или фильтрует по фамилии",
+        "parameters": [
+          {
+            "name": "lastName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Фильтр по фамилии пользователя"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный ответ со списком пользователей"
+          }
+        }
+      },
+      "post": {
+        "summary": "Создать нового пользователя",
+        "responses": {
+          "201": {
+            "description": "Пользователь успешно создан"
+          }
+        }
+      }
+    },
+    "/phones": {
+      "get": {
+        "summary": "Получить список телефонов",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID пользователя для фильтрации его телефонов"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список телефонов"
+          }
+        }
+      }
+    }
+  }
+}

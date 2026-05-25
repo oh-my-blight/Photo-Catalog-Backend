@@ -34,6 +34,11 @@ dependencies {
     // Управление подключением
     implementation("com.zaxxer:HikariCP:5.1.0")
 
+
+    // Swagger и OpenApi
+    implementation("io.ktor:ktor-server-openapi:3.0.3")
+    implementation("io.ktor:ktor-server-swagger:3.0.3")
+
     // Тестирование
     testImplementation(kotlin("test"))
 }

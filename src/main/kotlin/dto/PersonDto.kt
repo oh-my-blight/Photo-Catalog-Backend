@@ -1,4 +1,4 @@
-package backend.DTOs
+package dto
 
 import kotlinx.serialization.Serializable
 
