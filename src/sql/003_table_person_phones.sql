@@ -14,7 +14,43 @@ CREATE TABLE IF NOT EXISTS person_phones
         FOREIGN KEY (phone_type_id) REFERENCES phone_types (id) ON DELETE RESTRICT
 );
 
+
+CREATE OR REPLACE FUNCTION fn_phones_after_audit_trigger()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO audit_log(table_name, operation, row_id, new_data)
+        VALUES ('person_phones', 'INSERT', NEW.id, to_jsonb(NEW));
+
+        INSERT INTO person_phones_history(phone_id, person_id, phone_type_id, country_code, area_code, number)
+        VALUES (NEW.id, NEW.person_id, NEW.phone_type_id, NEW.country_code, NEW.area_code, NEW.number);
+
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO audit_log(table_name, operation, row_id, old_data, new_data)
+        VALUES ('person_phones', 'UPDATE', NEW.id, to_jsonb(OLD), to_jsonb(NEW));
+
+        IF (OLD.person_id, OLD.phone_type_id, OLD.country_code, OLD.area_code, OLD.number)
+            IS DISTINCT FROM (NEW.person_id, NEW.phone_type_id, NEW.country_code, NEW.area_code, NEW.number) THEN
+            INSERT INTO person_phones_history(phone_id, person_id, phone_type_id, country_code, area_code, number)
+            VALUES (NEW.id, NEW.person_id, NEW.phone_type_id, NEW.country_code, NEW.area_code, NEW.number);
+        END IF;
+
+    ELSIF (TG_OP = 'DELETE') THEN
+        INSERT INTO audit_log(table_name, operation, row_id, old_data)
+        VALUES ('person_phones', 'DELETE', OLD.id, to_jsonb(OLD));
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE INDEX IF NOT EXISTS idx_phones_person_id ON person_phones (person_id);
 CREATE INDEX IF NOT EXISTS idx_phones_full_number ON person_phones (number);
 
 
+CREATE TRIGGER trg_phones_after_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON person_phones
+    FOR EACH ROW
+EXECUTE FUNCTION fn_phones_after_audit_trigger();

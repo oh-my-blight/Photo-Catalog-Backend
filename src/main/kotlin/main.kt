@@ -1,6 +1,7 @@
 import factories.DatabaseFactory
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.cors.routing.* import io.ktor.http.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -18,7 +19,11 @@ import services.PhoneService
 data class StatusResponse(val status: String, val database: String)
 
 fun main() {
-    DatabaseFactory.init()
+    DatabaseFactory.configure()
+        .url("jdbc:postgresql://localhost:5430/postgres")
+        .user("postgres")
+        .password("1234")
+        .connect()
 
     val personService = PersonService()
     val phoneService = PhoneService()
@@ -29,29 +34,33 @@ fun main() {
             json()
         }
 
-        routing {
+        install(CORS) {
+            anyHost()
+            allowMethod(HttpMethod.Options)
+            allowMethod(HttpMethod.Get)
+            allowMethod(HttpMethod.Post)
+            allowMethod(HttpMethod.Put)
+            allowMethod(HttpMethod.Delete)
+            allowHeader(HttpHeaders.ContentType)
+            allowHeader(HttpHeaders.Authorization)
+            allowCredentials = true
+        }
 
+        routing {
             get("/") {
-                call.respondText("Ktor + Exposed + PostgreSQL API работает!")
+                call.respondText("API работает")
             }
 
-            swaggerUI(path = "swagger", swaggerFile = "src/main/resources/openapi/documentation.yaml")
-
-            openAPI(path = "openapi", swaggerFile = "src/main/resources/openapi/documentation.yaml")
+            swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
+            openAPI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
 
             get("/health") {
-                val response = StatusResponse(
-                    status = "OK",
-                    database = "Connected"
-                )
+                val response = StatusResponse(status = "OK", database = "Connected")
                 call.respond(response)
             }
 
-
             personRoutes(personService)
-
             phoneRoutes(phoneService)
         }
-
     }.start(wait = true)
 }

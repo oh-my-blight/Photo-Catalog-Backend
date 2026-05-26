@@ -1,11 +1,11 @@
 package services
+
 import database.PersonPhonesTable
 import dto.PhoneDto
 import kotlinx.coroutines.Dispatchers
 import models.Phone
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 class PhoneService {
@@ -22,11 +22,9 @@ class PhoneService {
         number = row[PersonPhonesTable.number]
     )
 
-
     suspend fun getAll(): List<Phone> = dbQuery {
         PersonPhonesTable.selectAll().map(::resultRowToPhone)
     }
-
 
     suspend fun getByPersonId(personId: Long): List<Phone> = dbQuery {
         PersonPhonesTable
@@ -34,14 +32,13 @@ class PhoneService {
             .map(::resultRowToPhone)
     }
 
-
-    suspend fun getById(id: Long): Phone? = dbQuery {
+    // ИСПРАВЛЕНО: Переменная названа phoneId
+    suspend fun getById(phoneId: Long): Phone? = dbQuery {
         PersonPhonesTable
-            .selectAll().where { PersonPhonesTable.id eq id }
+            .selectAll().where { PersonPhonesTable.id eq phoneId }
             .map(::resultRowToPhone)
             .singleOrNull()
     }
-
 
     suspend fun create(dto: PhoneDto): Phone = dbQuery {
         val insertStatement = PersonPhonesTable.insert {
@@ -56,9 +53,8 @@ class PhoneService {
             ?: throw Exception("Не удалось добавить телефон")
     }
 
-
-    suspend fun update(id: Long, dto: PhoneDto): Phone? = dbQuery {
-        val updatedRows = PersonPhonesTable.update({ PersonPhonesTable.id eq id }) {
+    suspend fun update(phoneId: Long, dto: PhoneDto): Phone? = dbQuery {
+        val updatedRows = PersonPhonesTable.update({ PersonPhonesTable.id eq phoneId }) {
             it[personId] = dto.personId
             it[phoneTypeId] = dto.phoneTypeId
             it[countryCode] = dto.countryCode
@@ -66,10 +62,10 @@ class PhoneService {
             it[number] = dto.number
         }
 
-        if (updatedRows > 0) getById(id) else null
+        if (updatedRows > 0) getById(phoneId) else null
     }
 
-    suspend fun deletePhone(id: Long): Boolean = dbQuery {
-        PersonPhonesTable.deleteWhere { PersonPhonesTable.id eq id } > 0
+    suspend fun deletePhone(phoneId: Long): Boolean = dbQuery {
+        PersonPhonesTable.deleteWhere { PersonPhonesTable.id eq phoneId } > 0
     }
 }
