@@ -20,7 +20,7 @@ data class StatusResponse(val status: String, val database: String)
 
 fun main() {
     DatabaseFactory.configure()
-        .url("jdbc:postgresql://localhost:5430/postgres")
+        .url("jdbc:postgresql://localhost:5429/postgres")
         .user("postgres")
         .password("1234")
         .connect()
